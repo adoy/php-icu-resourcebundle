@@ -1,9 +1,12 @@
 php-icu-resourcebundle
 ======================
 
-A PHP Implementation of the ICU Resource Bundle that work directly with .txt files (no need to use genrb)
+This is an ICU like Resource Bundle in PHP that work directly with .txt files (no need to use genrb)
 
-This implementation was developped for development environment only. It was developped to ease the process of creating ResourceBundle source without having to recompile the source file each time.
+This implementation was developped for **development environment only**, it should never run on production. It was developped to ease the process of creating ResourceBundle source without having to recompile the source file each time with genrb.
+
+This project is neither part of the real [ICU Project](http://site.icu-project.org/) nor [PHP Intl](http://www.php.net/intl).
+
 
 ### __Usage :__
 
