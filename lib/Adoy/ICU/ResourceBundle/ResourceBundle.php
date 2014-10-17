@@ -33,6 +33,11 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
     private $root = array();
 
     /**
+     * @cache array
+     */
+    private $cache;
+
+    /**
      * @var Parser
      */
     private $parser = array();

@@ -103,10 +103,10 @@ class Parser
                     $val = $this->scalarValueStatement();
                     if ($this->lexer->isNextToken(Lexer::T_COMMA)) {
                         $val = array($val);
-                        while ($this->lexer->isNextToken(Lexer::T_COMMA)) {
+                        do {
                             $this->match(Lexer::T_COMMA);
                             $val[] = $this->scalarValueStatement();
-                        }
+                        } while ($this->lexer->isNextToken(Lexer::T_COMMA));
                     }
                     return $val;
                 } elseif ($this->lexer->isNextToken(Lexer::T_TERM)) {
