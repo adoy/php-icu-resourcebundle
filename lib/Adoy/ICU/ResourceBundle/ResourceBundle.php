@@ -65,9 +65,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
     {
         $locale = $this->locale;
         do {
-            if (!$this->isLocaleLoaded($locale)) {
-                $this->root += $this->loadLocale($locale);
-            }
+            $this->loadLocale($locale);
             if (isset($this->cache[$locale][$key])) {
                 $val = $this->cache[$locale][$key];
                 if (is_array($val)) {
@@ -91,9 +89,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
     public function exists($key) {
         $locale = $this->locale;
         do {
-            if (!$this->isLocaleLoaded($locale)) {
-                $this->root += $this->loadLocale($locale);
-            }
+            $this->loadLocale($locale);
             if (isset($this->cache[$locale][$key])) {
                 return true;
             }
@@ -109,9 +105,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
     private function resolveAlias(ResourceAlias $alias)
     {
         $path = $alias->getIndexes();
-        if (!$this->isLocaleLoaded($path[0])) {
-            $this->root += $this->loadLocale($path[0]);
-        }
+        $this->loadLocale($path[0]);
         $node = $this->root;
         while ($key = array_shift($path)) {
             if (isset($node[$key])) {
@@ -129,11 +123,12 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
      */
     private function loadLocale($locale)
     {
-        $fn = $this->resourceDir . '/' . $locale . '.txt';
-        if (is_readable($fn)) {
-            return $this->parser->parse($fn);
+        if (!$this->isLocaleLoaded($locale)) {
+            $fn = $this->resourceDir . '/' . $locale . '.txt';
+            if (is_readable($fn)) {
+                $this->root += $this->parser->parse($fn);
+            }
         }
-        return array();
     }
 
     /**
@@ -202,9 +197,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
         $locale = $this->locale;
         $array = array();
         do {
-            if (!$this->isLocaleLoaded($locale)) {
-                $this->root += $this->loadLocale($locale);
-            }
+            $this->loadLocale($locale);
             if (!empty($this->cache[$locale])) {
                 $array = $this->cache[$locale];
                 break;
