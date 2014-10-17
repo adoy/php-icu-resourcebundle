@@ -1,0 +1,18 @@
+{
+    "name": "adoy/ICU/ResourceBundle",
+    "description": "PHP Implementation of the ICU Resource Bundle",
+    "license": "MIT",
+    "authors": [
+        { "name": "Charron Pierrick", "email": "pierrick@adoy.net" }
+    ],
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.3.*",
+        "mikey179/vfsStream": "1.4.*@dev"
+    },
+    "autoload": {
+        "psr-0": {"Adoy\\ICU\\ResourceBundle": "lib/"}
+    }
+}

@@ -1,0 +1,13 @@
+// Comments start with a '//' and extend to the end of the line 
+// first, a locale name for the bundle is defined. The whole bundle is a table
+// every resource, including the whole bundle has its name.
+// The name consists of invariant characters, digits and following symbols: -, _. 
+fr_CA:table {
+	toto {
+		tata {
+			titi {
+				"fr_CA:foobar"
+			}
+		}
+	}
+}

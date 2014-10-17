@@ -1,0 +1,94 @@
+// Comments start with a '//' and extend to the end of the line 
+// first, a locale name for the bundle is defined. The whole bundle is a table
+// every resource, including the whole bundle has its name.
+// The name consists of invariant characters, digits and following symbols: -, _. 
+root:table {
+    menu {
+        id { "mainmenu" }
+        items {
+            {
+                id { "file" }
+                name { "&File" }
+                items {
+                    {
+                        id { "open" }
+                        name { "&Open" }
+                    }
+                    {
+                        id { "save" }
+                        name { "&Save" }
+                    }
+                    {
+                        id { "exit" }
+                        name { "&Exit" }
+                    }
+                }
+            }
+
+            {
+                id { "edit" }
+                name { "&Edit" }
+                items {
+                    {
+                        id { "copy" }
+                        name { "&Copy" }
+                    }
+                    {
+                        id { "cut" }
+                        name { "&Cut" }
+                    }
+                    {
+                        id { "paste" }
+                        name { "&Paste" }
+                    }
+                }
+           }
+
+        }
+    }
+
+	foo {
+		bar {
+			baz:alias {
+				"fr_CA/toto/tata/titi"
+			}
+			invalid:alias {
+				"fr_CA/toto/unknown"
+			}
+		}
+	}
+	toto {
+		tata {
+			titi {
+				"ROOT:foobar"
+			}
+		}
+		to { "" }
+	}
+
+    // This resource is a table, thus accessible only through iteration and indexes...
+    errors {
+        "Invalid Command",
+		"Invalid 2"
+
+    }
+
+    splash:import { "splash_root.gif" } // This is a binary imported file
+
+    pgpkey:bin { a1b2c3d4e5f67890 } // a binary value
+
+    versionInfo { // a table
+        major:int { 1 } // of integers
+        minor:int { 4 }
+        patch:int { 7 }
+    }
+
+    buttonSize:intvector { 10, 20, 10, 20 } // an array of 32-bit integers
+
+    // will pick up data from zoneStrings resource in en bundle in the ICU package
+    simpleAlias:alias { "/ICUDATA/en/zoneStrings" }
+
+    // will pick up data from CollationElements resource in en bundle
+    // in the ICU package
+    CollationElements:alias { "/ICUDATA/en" }   
+}
