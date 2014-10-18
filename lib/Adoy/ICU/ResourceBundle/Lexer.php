@@ -163,8 +163,10 @@ class Lexer {
     {
         while (isset($this->data[$this->count])) {
             if (!preg_match($this->regex, $this->data, $matches, null, $this->count)) {
+                // @codeCoverageIgnoreStart
                 $msg = sprintf('Unexpected character "%s"', $this->data[$this->count]);
                 throw new LexingException($msg, LexingException::NO_TOKEN_FOUND, $this->fileName, $this->line);
+                // @codeCoverageIgnoreEnd
             }
             for ($i = 1; '' === $matches[$i]; ++$i);
             $this->count += strlen($matches[0]);
