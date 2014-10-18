@@ -3,6 +3,7 @@
 namespace Adoy\ICU\ResourceBundle;
 
 use org\bovigo\vfs\vfsStream;
+use Adoy\ICU\ResourceBundle\ParsingException;
 
 class ParserTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,166 +18,107 @@ class ParserTest extends \PHPUnit_Framework_TestCase
         $this->parser = new Parser(new Lexer());
     }
 
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testInvalidFormatForRootNode()
+    private function setExpectedParseError($msg = null, $code = ParsingException::FATAL_ERROR)
     {
-        $fileName = $this->fileFromStr('root:int { 10 }');
+        $this->setExpectedException('Adoy\ICU\ResourceBundle\ParsingException', $msg, $code);
+    }
+
+    /**
+     * @dataProvider validResourceBundleFileDataProvider
+     */
+    public function testParseValidResourceBundleFileWillReturnAnArrayRepresentingTheResource($source, $expectedResult)
+    {
+        $fileName = $this->fileFromStr($source);
+        $result = $this->parser->parse($fileName);
+        $this->assertEquals($expectedResult, $result);
+    }
+
+    /**
+     * @dataProvider invalidResourceBundleFileDataProvider
+     */
+    public function testParseInvalidResourceBundleWillThrowAParsingException($source)
+    {
+        $this->setExpectedParseError();
+        $fileName = $this->fileFromStr($source);
         $this->parser->parse($fileName);
     }
 
-    public function testParseInt()
+    public static function validResourceBundleFileDataProvider()
     {
-        $fileName = $this->fileFromStr('root { foo:int { 10 }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => 10)), $res);
+        return array(
+            array(
+                'root { foo:int { 10 }}',
+                array('root' => array('foo' => 10))
+            ),
+            array(
+                'root { foo:string { "bar" }}',
+                array('root' => array('foo' => 'bar'))
+            ),
+            array(
+                'root { foo:string { "bar" "baz" }}',
+                array('root' => array('foo' => 'barbaz'))
+            ),
+            array(
+                'root { foo:intvector { 10, 20, 30 }}',
+                array('root' => array('foo' => array(10, 20, 30)))
+            ),
+            array(
+                'root { foo:array { "foo", "bar", "baz" }}',
+                array('root' => array('foo' => array("foo", "bar", "baz")))
+            ),
+            array(
+                'root { foo { "foo", "bar", "baz" } }',
+                array('root' => array('foo' => array("foo", "bar", "baz")))
+            ),
+            array(
+                'root { foo:array { {"foo"} { 10 } }}',
+                array('root' => array('foo' => array("foo", 10)))
+            ),
+            array(
+                'root { foo:table { foo {"foo"} bar {"bar"} }}',
+                array('root' => array('foo' => array("foo" => "foo", "bar" => "bar")))
+            ),
+            array(
+                'root { foo:bin { abcd } }',
+                array('root' => array('foo' => base64_decode('abcd')))
+            ),
+            array(
+                'root { foo:alias { "root/bar" } }',
+                array('root' => array('foo' => new ResourceAlias('root/bar')))
+            ),
+            array(
+                'root { foo:import { "file2.txt" } }',
+                array('root' => array('foo' => 'Hello world'))
+            ),
+            array(
+                'root { foo { { "STR" }}}',
+                array('root' => array('foo' => array("STR")))
+            ),
+            array(
+                'root { foo { bar:string { "baz" }}}',
+                array('root' => array('foo' => array('bar' => 'baz')))
+            ),
+        );
     }
 
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testParseErrorInt()
+    public static function invalidResourceBundleFileDataProvider()
     {
-        $fileName = $this->fileFromStr('root { foo:int { "str" }}');
-        $this->parser->parse($fileName);
-    }
-
-    public function testParseString()
-    {
-        $fileName = $this->fileFromStr('root { foo:string { "bar" }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => 'bar')), $res);
-    }
-
-    public function testParseConcatenatedString()
-    {
-        $fileName = $this->fileFromStr('root { foo:string { "bar" "baz" }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => 'barbaz')), $res);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testParseErrorString()
-    {
-        $fileName = $this->fileFromStr('root { foo:string { 10 }}');
-        $this->parser->parse($fileName);
-    }
-
-    public function testParseIntVector()
-    {
-        $fileName = $this->fileFromStr('root { foo:intvector { 10, 20, 30 }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => array(10, 20, 30))), $res);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testParseErrorIntVector()
-    {
-        $fileName = $this->fileFromStr('root { foo:intvector { 10 "foo" }}');
-        $this->parser->parse($fileName);
-    }
-
-    public function testParseArray()
-    {
-        $fileName = $this->fileFromStr('root { foo:array { "foo", "bar" }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => array("foo", "bar"))), $res);
-    }
-
-    public function testParseArray2()
-    {
-        $fileName = $this->fileFromStr('root { foo:array { {"foo"} {"bar"} }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => array("foo", "bar"))), $res);
-    }
-
-    public function testParseTable()
-    {
-        $fileName = $this->fileFromStr('root { foo:table { foo {"foo"} bar {"bar"} }}');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => array("foo" => "foo", "bar" => "bar"))), $res);
-    }
-
-    public function testParseBin()
-    {
-        $fileName = $this->fileFromStr('root { foo:bin { abcd } }');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => base64_decode('abcd'))), $res);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testParseErrorBin()
-    {
-        $fileName = $this->fileFromStr('root { foo:bin { 10 } }');
-        $this->parser->parse($fileName);
-    }
-
-    public function testImport()
-    {
-        $fileName = $this->fileFromStr('root { foo:import { "file2.txt" } }');
-        $res = $this->parser->parse($fileName);
-        $this->assertSame(array('root' => array('foo' => 'Hello world')), $res);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testImportInvalidFileName()
-    {
-        $fileName = $this->fileFromStr('root { foo:import { "unknown.txt" } }');
-        $res = $this->parser->parse($fileName);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testParseError()
-    {
-        $fileName = $this->fileFromStr('root { foo:import { 10 } }');
-        $res = $this->parser->parse($fileName);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testInvalidNameResourceBundleName()
-    {
-        $fileName = $this->fileFromStr('root { foo:table { :string {"foo"} } }');
-        $this->parser->parse($fileName);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testInvalidFormat()
-    {
-        $fileName = $this->fileFromStr('root { foo:unknown { "foo" } }');
-        $this->parser->parse($fileName);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testParseErrorFormat()
-    {
-        $fileName = $this->fileFromStr('root { foo: { "foo" } }');
-        $this->parser->parse($fileName);
-    }
-
-    /**
-     * @expectedException Adoy\ICU\ResourceBundle\ParsingException
-     */
-    public function testMatch()
-    {
-        $fileName = $this->fileFromStr('root:table ');
-        $this->parser->parse($fileName);
+        return array(
+            array('root:int { 10 }'),
+            array('root { foo:int { "str" }}'),
+            array('root { foo:string { 10 }}'),
+            array('root { foo:intvector { 10 "foo" }}'),
+            array('root { foo:array { { : } }}'),
+            array('root { foo:array { {"foo"} { 10, {} } }}'),
+            array('root { foo:bin { 10 } }'),
+            array('root { foo:alias { 10 } }'),
+            array('root { foo:import { "unknown.txt" } }'),
+            array('root { foo:import { 10 } }'),
+            array('root { foo:table { :string {"foo"} } }'),
+            array('root { foo:unknown { "foo" } }'),
+            array('root { foo: { "foo" } }'),
+            array('root:table '),
+        );
     }
 }
 

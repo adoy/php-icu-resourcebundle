@@ -113,11 +113,10 @@ class Parser
                     return $this->tableValueStatement();
                 } elseif ($this->lexer->isNextToken(Lexer::T_LRANGEEX)) {
                     return $this->arrayValueStatement();
-                } else {
-                    $this->parseError('T_QUOTED, T_INT, T_TERM or T_RRANGEEX');
                 }
-        }
-    }
+                $this->parseError('T_QUOTED, T_INT, T_TERM or T_RRANGEEX');
+        } // @codeCoverageIgnore
+    } // @codeCoverageIgnore
 
     /**
      * bin_value ::= T_TERM.
@@ -129,7 +128,7 @@ class Parser
             return base64_decode($this->lexer->token['value']);
         }
         $this->parseError('T_TERM');
-    }
+    } // @codeCoverageIgnore
 
     /**
      * import_value ::= T_QUOTED.
@@ -141,13 +140,11 @@ class Parser
             $fileName = $this->cwd . DIRECTORY_SEPARATOR . substr($this->lexer->token['value'], 1, strlen($this->lexer->token['value']) -2);
             if (is_readable($fileName)) {
                 return file_get_contents($fileName);
-            } else {
-                throw new ParsingException('Enable to read file: ' . $fileName, ParsingException::FATAL_ERROR, $this->lexer->getFileName(), $this->lexer->token['line']);
             }
-        } else {
-            $this->parseError('T_QUOTED');
+            throw new ParsingException('Enable to read file: ' . $fileName, ParsingException::FATAL_ERROR, $this->lexer->getFileName(), $this->lexer->token['line']);
         }
-    }
+        $this->parseError('T_QUOTED');
+    } // @codeCoverageIgnore
 
     /**
      * array_value ::= optional_format T_LRANGEEX value T_RRANGEEX.
@@ -187,10 +184,9 @@ class Parser
             return $this->readSeparatedStringValue();
         } elseif ($this->lexer->isNextToken(Lexer::T_INT)) {
             return $this->intValueStatement();
-        } else {
-            $this->parseError('T_QUOTED or T_INT');
         }
-    }
+        $this->parseError('T_QUOTED or T_INT');
+    } // @codeCoverageIgnore
 
     /**
      * intvector_value ::= intvector_value T_COMMA T_INT.
@@ -205,7 +201,7 @@ class Parser
         }
         if (!$this->lexer->isNextToken(Lexer::T_RRANGEEX)) {
             $this->parseError('T_COMMA or T_RRANGEEX');
-        }
+        } // @codeCoverageIgnore
         return $intVector;
     }
 
@@ -219,7 +215,7 @@ class Parser
             return $this->readSeparatedStringValue();
         }
         $this->parseError('T_QUOTED');
-    }
+    } // @codeCoverageIgnore
 
     /**
      * alias_value ::= T_QUOTED.
@@ -229,10 +225,9 @@ class Parser
         if ($this->lexer->isNextToken(Lexer::T_QUOTED)) {
             $this->lexer->yylex();
             return new ResourceAlias(substr($this->lexer->token['value'], 1, strlen($this->lexer->token['value']) -2));
-        } else {
-            $this->parseError('T_QUOTED');
         }
-    }
+        $this->parseError('T_QUOTED');
+    } // @codeCoverageIgnore
 
     private function readSeparatedStringValue()
     {
@@ -254,7 +249,7 @@ class Parser
             return (int) $this->lexer->token['value'];
         }
         $this->parseError('T_INT');
-    }
+    } // @codeCoverageIgnore
 
     /**
      * table_value ::= optional_name optional_format T_LRANGEEX value T_RRANGEEX.
@@ -290,8 +285,8 @@ class Parser
             return $this->lexer->token['value'];
         } elseif ($mandatory) {
             $this->parseError('T_TERM or T_INT');
-        }
-    }
+        } // @codeCoverageIgnore
+    } // @codeCoverageIgnore
 
     /**
      * optional_format ::= format.
@@ -307,13 +302,12 @@ class Parser
                 $format = strtolower($this->lexer->lookAhead['value']);
                 if (!in_array($format, array('table', 'array', 'string', 'bin', 'import', 'int', 'intvector', 'alias'))) {
                     $this->parseError('table, array, string, bin, import, int, intvector or alias');
-                }
+                } // @codeCoverageIgnore
                 $this->lexer->yylex();
                 return $format;
-            } else {
-                $this->parseError('table, array, string, bin, import, int, intvector or alias');
             }
-        }
+            $this->parseError('table, array, string, bin, import, int, intvector or alias');
+        } // @codeCoverageIgnore
     }
 
     /**
@@ -325,7 +319,7 @@ class Parser
     {
         if ($this->lexer->lookAhead['type'] !== $token) {
             $this->parseError($str ? $str : $this->lexer->getLiteral($token));
-        }
+        } // @codeCoverageIgnore
         $this->lexer->yylex();
     }
 
@@ -344,5 +338,5 @@ class Parser
         $msg = 'Parse error: ';
         $msg .= ($expected) ? 'expected ' . $expected . ' got ' . $currentToken : 'unexpected ' . $currentToken;
         throw new ParsingException($msg, ParsingException::FATAL_ERROR, $this->lexer->getFileName(), $token['line']);
-    }
+    } // @codeCoverageIgnore
 }
