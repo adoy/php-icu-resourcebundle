@@ -58,14 +58,19 @@ class Parser
     {
         $lang = $this->nameStatement();
         if (($format = $this->formatStatement()) && ($format !== 'table')) {
-            throw new ParsingException('Root node must have a table format', ParsingException::FATAL_ERROR, $this->lexer->getFileName(), $this->lexer->token['line']);
+            throw new ParsingException(
+                'Root node must have a table format',
+                ParsingException::FATAL_ERROR,
+                $this->lexer->getFileName(),
+                $this->lexer->token['line']
+            );
         }
         array_push($this->formatStack, 'table');
         $this->match(Lexer::T_LRANGEEX);
         $value = array($lang => $this->tableValueStatement());
         $this->match(Lexer::T_RRANGEEX);
         array_pop($this->formatStack);
-        $this->match(NULL, 'EOF');
+        $this->match(null, 'EOF');
         return $value;
     }
 
@@ -137,11 +142,17 @@ class Parser
     {
         if ($this->lexer->isNextToken(Lexer::T_QUOTED)) {
             $this->lexer->yylex();
-            $fileName = $this->cwd . DIRECTORY_SEPARATOR . substr($this->lexer->token['value'], 1, strlen($this->lexer->token['value']) -2);
+            $fileName = $this->cwd . DIRECTORY_SEPARATOR
+                . substr($this->lexer->token['value'], 1, strlen($this->lexer->token['value']) -2);
             if (is_readable($fileName)) {
                 return file_get_contents($fileName);
             }
-            throw new ParsingException('Enable to read file: ' . $fileName, ParsingException::FATAL_ERROR, $this->lexer->getFileName(), $this->lexer->token['line']);
+            throw new ParsingException(
+                'Enable to read file: ' . $fileName,
+                ParsingException::FATAL_ERROR,
+                $this->lexer->getFileName(),
+                $this->lexer->token['line']
+            );
         }
         $this->parseError('T_QUOTED');
     } // @codeCoverageIgnore
@@ -299,12 +310,20 @@ class Parser
             $this->match(Lexer::T_COLON);
             if ($this->lexer->isNextToken(Lexer::T_TERM)) {
                 $format = strtolower($this->lexer->lookAhead['value']);
-                if (!in_array($format, array('table', 'array', 'string', 'bin', 'import', 'int', 'intvector', 'alias'))) {
-                    $this->parseError('table, array, string, bin, import, int, intvector or alias');
-                } // @codeCoverageIgnore
+                $this->validateFormat($format);
                 $this->lexer->yylex();
                 return $format;
             }
+            $this->parseError('table, array, string, bin, import, int, intvector or alias');
+        } // @codeCoverageIgnore
+    }
+
+    /**
+     * @param string $format
+     */
+    private function validateFormat($format)
+    {
+        if (!in_array($format, array('table', 'array', 'string', 'bin', 'import', 'int', 'intvector', 'alias'))) {
             $this->parseError('table, array, string, bin, import, int, intvector or alias');
         } // @codeCoverageIgnore
     }

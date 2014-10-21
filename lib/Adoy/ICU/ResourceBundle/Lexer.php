@@ -10,8 +10,8 @@
 
 namespace Adoy\ICU\ResourceBundle;
 
-class Lexer {
-
+class Lexer
+{
     /**
      * List of Tokens
      */
@@ -93,7 +93,8 @@ class Lexer {
      * @param string|null $fileName File to tokenize
      * @return void
      */
-    public function __construct($fileName = null) {
+    public function __construct($fileName = null)
+    {
         $this->regex    = '#\G(' . implode(')|\G(', array_keys($this->tokenPatterns)) . ')#A';
         $this->tokenMap = array_values($this->tokenPatterns);
         if (null !== $fileName) {
@@ -137,7 +138,8 @@ class Lexer {
      * @throw LexingException
      * @return boolean true if a token was found, false otherwise
      */
-    public function yylex() {
+    public function yylex()
+    {
         $this->token = $this->lookAhead;
         $this->lookAhead = $this->getNextToken();
         return (bool) $this->token;
@@ -149,7 +151,8 @@ class Lexer {
      * @param mixed $token
      * @return bool
      */
-    public function isNextToken($token) {
+    public function isNextToken($token)
+    {
         return null !== $this->lookAhead && $this->lookAhead['type'] === $token;
     }
 

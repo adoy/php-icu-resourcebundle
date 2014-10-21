@@ -10,8 +10,8 @@
 
 namespace Adoy\ICU\ResourceBundle;
 
-class LexingException extends \Exception {
-
+class LexingException extends \Exception
+{
     const FILE_NOT_FOUND = 1;
     const NO_TOKEN_FOUND = 2;
 

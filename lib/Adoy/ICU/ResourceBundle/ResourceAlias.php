@@ -10,15 +10,24 @@
 
 namespace Adoy\ICU\ResourceBundle;
 
-class ResourceAlias {
-
+class ResourceAlias
+{
+    /**
+     * @var string
+     */
     private $ref;
 
+    /**
+     * @param string $ref 
+     */
     public function __construct($ref)
     {
         $this->ref = $ref;
     }
 
+    /**
+     * @return array
+     */
     public function getIndexes()
     {
         return explode('/', $this->ref);

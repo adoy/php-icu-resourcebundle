@@ -78,7 +78,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
                 }
                 return $val;
             }
-        } while($this->fallback && $locale = $this->getParent($locale));
+        } while ($this->fallback && $locale = $this->getParent($locale));
         return null;
     }
 
@@ -86,16 +86,16 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
      * @param string|int $key
      * @return bool
      */
-    public function exists($key) {
+    public function exists($key)
+    {
         $locale = $this->locale;
         do {
             $this->loadLocale($locale);
             if (isset($this->cache[$locale][$key])) {
                 return true;
             }
-        } while($this->fallback && $locale = $this->getParent($locale));
+        } while ($this->fallback && $locale = $this->getParent($locale));
         return false;
-
     }
 
     /**
@@ -148,7 +148,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
     {
         if ('root' === $locale) {
             return null;
-        } else if ($parent = substr($locale, 0, strrpos($locale, "_"))) {
+        } elseif ($parent = substr($locale, 0, strrpos($locale, "_"))) {
             return $parent;
         } else {
             return 'root';
@@ -202,7 +202,7 @@ class ResourceBundle implements \ArrayAccess, \IteratorAggregate
                 $array = $this->cache[$locale];
                 break;
             }
-        } while($this->fallback && $locale = $this->getParent($locale));
+        } while ($this->fallback && $locale = $this->getParent($locale));
         return new \ArrayIterator($array);
     }
 }
