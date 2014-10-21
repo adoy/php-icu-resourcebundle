@@ -268,8 +268,7 @@ class Parser
             $table[$name] = $this->valueStatement();
             $this->match(Lexer::T_RRANGEEX);
             array_pop($this->formatStack);
-            if ($this->lexer->isNextToken(Lexer::T_RRANGEEX)) break;
-        } while(true);
+        } while (!$this->lexer->isNextToken(Lexer::T_RRANGEEX));
 
         return $table;
     }
